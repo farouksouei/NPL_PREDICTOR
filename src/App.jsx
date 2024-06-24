@@ -90,6 +90,9 @@ const App = () => {
                 data: [npl],
                 type: 'bar',
                 barWidth: '50px', // Set the width of the bar
+                itemStyle: {
+                    color: '#FF0000',
+                },
             },
         ],
     };
