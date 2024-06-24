@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Drawer, AppBar, Toolbar, IconButton } from '@mui/material';
+import {
+    Container,
+    TextField,
+    Button,
+    Typography,
+    Drawer,
+    AppBar,
+    Toolbar,
+    IconButton,
+    Switch,
+    FormControlLabel,
+    Grid, Box
+} from '@mui/material';
 import ReactECharts from 'echarts-for-react';
 import MenuIcon from '@mui/icons-material/Menu';
 import BH_BANK from './assets/bh-bank-new-rouge.jpg'; // replace with the actual path
@@ -29,6 +41,14 @@ const App = () => {
         setVariables({
             ...variables,
             [name]: parseFloat(value),
+        });
+    };
+
+    const handleSwitchChange = (e) => {
+        const { name, checked } = e.target;
+        setVariables({
+            ...variables,
+            [name]: checked ? 1 : 0,
         });
     };
 
@@ -69,39 +89,55 @@ const App = () => {
                 name: 'NPL',
                 data: [npl],
                 type: 'bar',
-                barWidth: '20px', // Set the width of the bar
-
+                barWidth: '50px', // Set the width of the bar
             },
         ],
     };
 
     return (
         <>
-                <AppBar position="static" sx={{ backgroundColor: '#000033' }}> {/* Night blue color */}
-                    <Toolbar>
-                        <img src={BH_BANK} alt="BH_BANK logo" height="50px" style={{margin:5}}/> {/* Adjust size as needed */}
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <AppBar position="static" sx={{ backgroundColor: '#000033' }}> {/* Night blue color */}
+                <Toolbar>
+                    <img src={BH_BANK} alt="BH_BANK logo" height="50px" style={{margin:5}}/> {/* Adjust size as needed */}
+                    <Box display="flex" justifyContent="center" flexGrow={1}>
+                        <Typography variant="h6" component="div">
                             NPL Predictor
                         </Typography>
-                        <img src={images} alt="images logo" height="50px" /> {/* Adjust size as needed */}
-                        <IconButton edge="end" color="inherit" onClick={toggleDrawer}>
-                            <MenuIcon />
-                        </IconButton>
-                    </Toolbar>
-                </AppBar>
+                    </Box>
+                    <img src={images} alt="images logo" height="50px" /> {/* Adjust size as needed */}
+                    <IconButton edge="end" color="inherit" onClick={toggleDrawer}>
+                        <MenuIcon />
+                    </IconButton>
+                </Toolbar>
+            </AppBar>
             <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer}>
                 <Container>
                     {Object.keys(variables).map((key) => (
-                        <TextField
-                            key={key}
-                            label={key}
-                            name={key}
-                            type="number"
-                            onChange={handleChange}
-                            margin="normal"
-                            fullWidth
-                            defaultValue={variables[key]}
-                        />
+                        key === 'CHOC' || key === 'SP' ? (
+                            <FormControlLabel
+                                key={key}
+                                control={
+                                    <Switch
+                                        checked={variables[key] === 1}
+                                        onChange={handleSwitchChange}
+                                        name={key}
+                                        color="primary"
+                                    />
+                                }
+                                label={key}
+                            />
+                        ) : (
+                            <TextField
+                                key={key}
+                                label={key}
+                                name={key}
+                                type="number"
+                                onChange={handleChange}
+                                margin="normal"
+                                fullWidth
+                                defaultValue={variables[key]}
+                            />
+                        )
                     ))}
                     <Button variant="contained" color="primary" onClick={calculateNPL}>
                         Calculate NPL
@@ -109,7 +145,39 @@ const App = () => {
                 </Container>
             </Drawer>
             {npl !== null && (
-                <ReactECharts option={chartOptions} style={{ height: '500px', margin:50 }} />
+                <div style={{ margin:50 }}>
+                    <ReactECharts option={chartOptions}  style={{ height: '500px'}}/>
+
+                    <Grid container spacing={2}>
+                        <Grid item xs={3}>
+                        <TextField
+                            label={"NPL Value"}
+                            value={npl.toFixed(8)}
+                            margin="normal"
+                            fullWidth
+                            InputProps={{
+                                readOnly: true,
+                            }}
+                        />
+                        </Grid>
+                    {Object.keys(variables).map((key) => (
+                        // eslint-disable-next-line react/jsx-key
+                        <Grid item xs={3}>
+                            <TextField
+                                key={key}
+                                label={key}
+                                value={variables[key]}
+                                margin="normal"
+                                fullWidth
+                                disabled={true}
+                                InputProps={{
+                                    readOnly: true,
+                                }}
+                            />
+                        </Grid>
+                    ))}
+                    </Grid>
+                </div>
             )}
         </>
     );
