@@ -32,9 +32,26 @@ const App = () => {
         CAPITAUX_PROPRES: 411,
     };
 
+    const PIB_2024_2025 = [
+        0.04381427, 0.04056039
+    ];
+
+    const TMM_2024_2025 = [
+        0.77909, 0.75105
+    ];
+
+    const INF_2024_2025 = [
+        0.06963333, 0.07874873
+    ];
+
+    const CHOM_2024_2025 = [
+        0.16509542, 0.1619656
+    ];
+
     const [variables, setVariables] = useState(initialVariables);
     const [npl, setNPL] = useState(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [selectedYear, setSelectedYear] = useState(null); // Track selected year
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -62,6 +79,27 @@ const App = () => {
 
     const toggleDrawer = () => {
         setDrawerOpen(!drawerOpen);
+    };
+
+    const setValuesForYear = (year) => {
+        if (year === 2024) {
+            setVariables((prevVariables) => ({
+                ...prevVariables,
+                PIB: PIB_2024_2025[0],
+                TMM: TMM_2024_2025[0],
+                INF: INF_2024_2025[0],
+                CHOM: CHOM_2024_2025[0],
+            }));
+        } else if (year === 2025) {
+            setVariables((prevVariables) => ({
+                ...prevVariables,
+                PIB: PIB_2024_2025[1],
+                TMM: TMM_2024_2025[1],
+                INF: INF_2024_2025[1],
+                CHOM: CHOM_2024_2025[1],
+            }));
+        }
+        setSelectedYear(year);
     };
 
     const chartOptions = {
@@ -115,6 +153,12 @@ const App = () => {
             </AppBar>
             <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer}>
                 <Container>
+                    <Button variant="contained" color="secondary" onClick={() => setValuesForYear(2024)}>
+                        Set Values for 2024
+                    </Button>
+                    <Button variant="contained" color="secondary" onClick={() => setValuesForYear(2025)}>
+                        Set Values for 2025
+                    </Button>
                     {Object.keys(variables).map((key) => (
                         key === 'CHOC' || key === 'SP' ? (
                             <FormControlLabel
@@ -138,7 +182,7 @@ const App = () => {
                                 onChange={handleChange}
                                 margin="normal"
                                 fullWidth
-                                defaultValue={variables[key]}
+                                value={variables[key]}
                             />
                         )
                     ))}
@@ -148,37 +192,35 @@ const App = () => {
                 </Container>
             </Drawer>
             {npl !== null && (
-                <div style={{ margin:50 }}>
-                    <ReactECharts option={chartOptions}  style={{ height: '500px'}}/>
+                <div style={{ margin: 50 }}>
+                    <ReactECharts option={chartOptions} style={{ height: '500px' }} />
 
                     <Grid container spacing={2}>
                         <Grid item xs={3}>
-                        <TextField
-                            label={"NPL Value"}
-                            value={npl.toFixed(8)}
-                            margin="normal"
-                            fullWidth
-                            InputProps={{
-                                readOnly: true,
-                            }}
-                        />
-                        </Grid>
-                    {Object.keys(variables).map((key) => (
-                        // eslint-disable-next-line react/jsx-key
-                        <Grid item xs={3}>
                             <TextField
-                                key={key}
-                                label={key}
-                                value={variables[key]}
+                                label={"NPL Value"}
+                                value={npl.toFixed(8)}
                                 margin="normal"
                                 fullWidth
-                                disabled={true}
                                 InputProps={{
                                     readOnly: true,
                                 }}
                             />
                         </Grid>
-                    ))}
+                        {Object.keys(variables).map((key) => (
+                            <Grid item xs={3} key={key}>
+                                <TextField
+                                    label={key}
+                                    value={variables[key]}
+                                    margin="normal"
+                                    fullWidth
+                                    disabled={true}
+                                    InputProps={{
+                                        readOnly: true,
+                                    }}
+                                />
+                            </Grid>
+                        ))}
                     </Grid>
                 </div>
             )}
